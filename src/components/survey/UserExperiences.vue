@@ -5,7 +5,8 @@
       <div>
         <base-button @click="loadExperiences">Load Submitted Experiences</base-button>
       </div>
-      <ul>
+      <p v-if="isLoading">Loading data...</p>
+      <ul v-else>
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -26,12 +27,13 @@ export default {
   },
   data() {
     return {
-      results: []
+      results: [],
+      isLoading: false,
     }
   },
   methods: {
     loadExperiences() {
-
+      this.isLoading = true;
       fetch(`${process.env.VUE_APP_FIREBASE_API}/surveys.json`).then((response) => {
         if(response.ok) {
           return response.json()
@@ -42,8 +44,12 @@ export default {
           results.push({ id, name: data[id].name, rating: data[id].rating });
         }
         this.results = results;
+        this.isLoading = false;
       })
     }
+  },
+  mounted() {
+    this.loadExperiences();
   }
 };
 </script>
