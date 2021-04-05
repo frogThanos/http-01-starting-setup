@@ -6,8 +6,9 @@
         <base-button @click="loadExperiences">Load Submitted Experiences</base-button>
       </div>
       <p v-if="isLoading">Loading data...</p>
+      <p v-else-if="!isLoading && error">{{ error }}</p>
       <p v-else-if="!isLoading && (!results || results.length === 0)">No stored Experiences found. Please add some!</p>
-      <ul v-else-if="!isLoading && results && results.length > 0">
+      <ul v-else>
         <survey-result
           v-for="result in results"
           :key="result.id"
@@ -30,11 +31,13 @@ export default {
     return {
       results: [],
       isLoading: false,
+      error: null
     }
   },
   methods: {
     loadExperiences() {
       this.isLoading = true;
+      this.error = null;
       fetch(`${process.env.VUE_APP_FIREBASE_API}/surveys.json`).then((response) => {
         if(response.ok) {
           return response.json()
@@ -46,6 +49,10 @@ export default {
         }
         this.results = results;
         this.isLoading = false;
+      }).catch((error) => {
+        console.error(error);
+        this.isLoading = false;
+        this.error = 'Failed to fetch data, please try again later...';
       })
     }
   },
